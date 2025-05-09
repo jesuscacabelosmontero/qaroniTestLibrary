@@ -8,7 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "library_user")
+@Table(name = "LIBRARY_USERS")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -29,9 +29,9 @@ public class User {
 
     @ManyToMany
     @JoinTable(
-        name = "user_role",
-        joinColumns = @JoinColumn( name = "USER_ID", referencedColumnName = "id" ),
-        inverseJoinColumns = @JoinColumn( name = "ROLE_ID", referencedColumnName = "id")
+        name = "USER_ROLES",
+        joinColumns = @JoinColumn( name = "user_id", referencedColumnName = "id" ),
+        inverseJoinColumns = @JoinColumn( name = "role_id", referencedColumnName = "id")
     )
     private List<Role> roles;
 }

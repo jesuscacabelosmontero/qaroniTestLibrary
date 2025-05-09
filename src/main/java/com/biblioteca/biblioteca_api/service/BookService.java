@@ -31,6 +31,8 @@ public class BookService {
         Optional<Book> existingBook = bookRepository.findById(id);
         if (existingBook.isPresent()) {
             Book bookToUpdate = existingBook.get();
+            bookToUpdate.setTitle(updatedBook.getTitle());
+            bookToUpdate.setAuthors(updatedBook.getAuthors());
             return bookRepository.save(bookToUpdate);
         }
         return null;

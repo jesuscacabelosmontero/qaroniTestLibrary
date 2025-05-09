@@ -32,6 +32,8 @@ public class AuthorService {
 
         if (existingAuthor.isPresent()) {
             Author authorToUpdate = existingAuthor.get();
+            authorToUpdate.setName(updatedAuthor.getName());
+            authorToUpdate.setBooks(updatedAuthor.getBooks());
             return authorRepository.save(authorToUpdate);
         }
 
