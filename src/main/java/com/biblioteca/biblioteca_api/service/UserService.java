@@ -52,6 +52,7 @@ public class UserService {
 
     private void sendWelcomeEmail(String to, String name) {
         SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom("bibliotecaprueba184@gmail.com");
         message.setTo(to);
         message.setSubject("Welcome to the library");
         message.setText("Hello " + name + ",\n\nthanks for signing up to our library.");

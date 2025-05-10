@@ -1,12 +1,21 @@
 package com.biblioteca.biblioteca_api.service;
 
+import com.biblioteca.biblioteca_api.dto.AuthorDto;
+import com.biblioteca.biblioteca_api.dto.CreateOrUpdateAuthorRequestDto;
+import com.biblioteca.biblioteca_api.exception.AuthorNotFoundException;
+import com.biblioteca.biblioteca_api.exception.BookNotFoundException;
+import com.biblioteca.biblioteca_api.mapper.AuthorMapper;
 import com.biblioteca.biblioteca_api.model.Author;
+import com.biblioteca.biblioteca_api.model.Book;
 import com.biblioteca.biblioteca_api.repository.AuthorRepository;
+import com.biblioteca.biblioteca_api.repository.BookRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class AuthorService {
@@ -14,29 +23,47 @@ public class AuthorService {
     @Autowired
     private AuthorRepository authorRepository;
 
-    public List<Author> getAllAuthors() {
-        return authorRepository.findAll();
+    @Autowired
+    private BookRepository bookRepository;
+
+    public List<AuthorDto> getAllAuthors() {
+        return AuthorMapper.toAuthorDtoList(authorRepository.findAllByOrderByIdAsc());
     }
 
-    public Author getAuthorDetail(Long id) {
-        Optional<Author> author = authorRepository.findById(id);
-        return author.orElse(null);
+    public AuthorDto getAuthorDetail(Long id) {
+        Author author = authorRepository.findById(id)
+            .orElseThrow(() -> new AuthorNotFoundException("Author with id " + id + " not found"));
+        return AuthorMapper.toAuthorDto(author);
     }
 
-    public Author createAuthor(Author author) {
-        return authorRepository.save(author);
+    public AuthorDto createAuthor(CreateOrUpdateAuthorRequestDto requestDto) {
+        List<Book> books = retrieveBooks(requestDto.getBookIds());
+        Author author = new Author();
+        author.setName(requestDto.getName());
+        author.setBooks(books);
+        return AuthorMapper.toAuthorDto(authorRepository.save(author));
     }
 
-    public Author updateAuthor(Long id, Author updatedAuthor) {
-        Optional<Author> existingAuthor = authorRepository.findById(id);
+    public AuthorDto updateAuthor(Long id, CreateOrUpdateAuthorRequestDto requestDto) {
+        Author authorToUpdate = authorRepository.findById(id)
+            .orElseThrow(() -> new AuthorNotFoundException("Author with id " + id + " not found"));
+        List<Book> books = retrieveBooks(requestDto.getBookIds());
+        authorToUpdate.setName(requestDto.getName());
+        authorToUpdate.setBooks(books);
+        return AuthorMapper.toAuthorDto(authorRepository.save(authorToUpdate));
+    }
 
-        if (existingAuthor.isPresent()) {
-            Author authorToUpdate = existingAuthor.get();
-            authorToUpdate.setName(updatedAuthor.getName());
-            authorToUpdate.setBooks(updatedAuthor.getBooks());
-            return authorRepository.save(authorToUpdate);
+    private List<Book> retrieveBooks(List<Long> bookIds) {
+        List<Book> books = bookRepository.findAllById(bookIds);
+        if (books.size() != bookIds.size()) {
+            Set<Long> foundIds = books.stream()
+                .map(Book::getId)
+                .collect(Collectors.toSet());
+            List<Long> missing = bookIds.stream()
+                .filter(id -> !foundIds.contains(id))
+                .collect(Collectors.toList());
+            throw new BookNotFoundException("Books not found with IDs: " + missing);
         }
-
-        return null;
+        return books;
     }
 }

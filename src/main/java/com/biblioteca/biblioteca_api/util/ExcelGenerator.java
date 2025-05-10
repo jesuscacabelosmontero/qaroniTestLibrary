@@ -1,4 +1,4 @@
-package com.biblioteca.biblioteca_api.service;
+package com.biblioteca.biblioteca_api.util;
 
 import com.biblioteca.biblioteca_api.model.Author;
 import com.biblioteca.biblioteca_api.repository.AuthorRepository;
@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.util.List;
 
 @Service
-public class ExportService {
+public class ExcelGenerator {
 
     @Autowired
     private BookRepository bookRepository;
@@ -22,7 +22,7 @@ public class ExportService {
     @Autowired
     private AuthorRepository authorRepository;
 
-    public byte[] generateSummaryExcel() {
+    public byte[] generateExcel() {
         try (Workbook workbook = new XSSFWorkbook()) {
             Sheet sheet = workbook.createSheet("Library Summary");
 

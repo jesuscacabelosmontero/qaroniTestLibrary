@@ -1,52 +1,46 @@
 package com.biblioteca.biblioteca_api.controller;
 
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.*;
 
 import com.biblioteca.biblioteca_api.dto.LoginRequest;
+import com.biblioteca.biblioteca_api.dto.LoginResponse;
 import com.biblioteca.biblioteca_api.model.User;
-import com.biblioteca.biblioteca_api.service.AuthenticationService;
+import com.biblioteca.biblioteca_api.repository.UserRepository;
+import com.biblioteca.biblioteca_api.security.JwtTokenUtil;
 
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 
 @RestController
 @RequestMapping("/auth")
 public class LoginController {
+    
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
-    private AuthenticationService authenticationService;
-    
+    private JwtTokenUtil jwtTokenUtil;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody LoginRequest request, HttpSession session, HttpServletResponse response) {
-        User user = authenticationService.authenticate(request);
-        if (user == null){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Wrong credentials");
-        }
-        session.setAttribute("user", user);
-        Cookie sessionCookie = new Cookie("JSESSIONID", session.getId());
-        sessionCookie.setHttpOnly(true);
-        sessionCookie.setMaxAge(3600);
-        sessionCookie.setPath("/"); 
-        response.addCookie(sessionCookie);
-        return ResponseEntity.status(HttpStatus.OK).body("Logged correctly");
-    }
+    public ResponseEntity<?> login(
+        @RequestBody LoginRequest loginRequest
+    ) {
+        Optional<User> userOpt = userRepository.findByEmail(loginRequest.getEmail());
 
-    @PostMapping("/logout")
-    public ResponseEntity<String> logout(HttpSession session, HttpServletResponse response) {
-        session.invalidate();
-        Cookie cookie = new Cookie("JSESSIONID", null);
-        cookie.setHttpOnly(true);
-        cookie.setMaxAge(0);  
-        cookie.setPath("/"); 
-        response.addCookie(cookie);
-        return ResponseEntity.ok("Logged out successfully.");
+        if (userOpt.isEmpty() || !userOpt.get().getPassword().equals(passwordEncoder.encode(loginRequest.getPassword()))) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
+        }
+
+        User user = userOpt.get();
+        String token = jwtTokenUtil.generateToken(user);
+
+        return ResponseEntity.ok(new LoginResponse(token));
     }
 }
