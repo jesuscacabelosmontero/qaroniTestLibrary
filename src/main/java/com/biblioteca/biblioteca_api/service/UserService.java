@@ -9,7 +9,6 @@ import com.biblioteca.biblioteca_api.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -23,9 +22,6 @@ public class UserService {
 
     @Autowired
     private RoleRepository roleRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
 
     @Autowired
     private JavaMailSender mailSender;
@@ -43,7 +39,7 @@ public class UserService {
         User user = new User();
         user.setEmail(newUserDto.getEmail());
         user.setName(newUserDto.getName());
-        user.setPassword(passwordEncoder.encode(newUserDto.getPassword()));
+        user.setPassword(newUserDto.getPassword());
         user.setRoles(userRoles);
 
         userRepository.save(user);
