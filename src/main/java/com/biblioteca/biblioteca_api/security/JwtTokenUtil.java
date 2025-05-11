@@ -28,7 +28,7 @@ public class JwtTokenUtil {
             JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
                 .subject(user.getEmail())
                 .claim("roles", roles)
-                .expirationTime(new Date(new Date().getTime() + 600)) //diez minutos, esta en segundos.
+                .expirationTime(new Date(new Date().getTime() + 600000)) //diez minutos, esta en milissegundos.
                 .build();
 
             SignedJWT signedJWT = new SignedJWT(

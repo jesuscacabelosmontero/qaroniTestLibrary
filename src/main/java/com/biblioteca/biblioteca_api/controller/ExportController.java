@@ -19,7 +19,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @RequestMapping("/export")
-@Tag(name = "Export", description = "Endpoints para exportar datos en formato Excel.")
+@Tag(name = "ExportController", description = "Endpoints para exportar datos en formato Excel.")
 public class ExportController {
     
     @Autowired

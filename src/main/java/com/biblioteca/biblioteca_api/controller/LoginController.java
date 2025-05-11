@@ -22,7 +22,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @RequestMapping("/auth")
-@Tag(name = "Auth", description = "Endpoints para la autenticación de usuarios.")
+@Tag(name = "LoginController", description = "Endpoints para la autenticación de usuarios.")
 public class LoginController {
     
     @Autowired
@@ -41,7 +41,7 @@ public class LoginController {
     })
     @PostMapping("/login")
     public ResponseEntity<?> login(
-                @io.swagger.v3.oas.annotations.parameters.RequestBody(
+        @io.swagger.v3.oas.annotations.parameters.RequestBody(
             description = "Datos de inicio de sesion", required = true
         )
         @RequestBody LoginRequest loginRequest

@@ -7,7 +7,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
@@ -27,7 +26,12 @@ public class UserController {
         @ApiResponse(responseCode = "409", description = "Conflicto - El correo electrónico ya está en uso", content = @Content(mediaType = "text/plain;charset=UTF-8"))
     })
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@RequestBody UserRegistrationDto newUserDto) {
+    public ResponseEntity<String> registerUser(
+        @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "Datos de registro", required = true
+        )
+        @RequestBody UserRegistrationDto newUserDto
+    ) {
         try {
             userService.registerUser(newUserDto);
             return ResponseEntity.status(HttpStatus.CREATED).body("Usuario registrado con éxito.");
