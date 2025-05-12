@@ -1,0 +1,54 @@
+Se tiene un modelo relacional para un sistema de información con datos de trabajadores y proyectos de una empresa de servicios:
+
+Empleados (id, dni, nombre, apellido, fechaNacimiento, salario, ciudad)
+
+Asignaciones (id, nombre, idEmpleado, idProyecto, idSupervisor, horasDedicadas)
+
+Proyectos (id, nombre, empresa, ciudad)
+
+Realizar las siguientes consultas en SQL:
+
+a) Mostrar el nombre y apellidos de los empleados que tienen algún proyecto en su ciudad. No debe haber duplicados. La salida debe estar ordenada por apellido, y en caso de mismo apellido, por nombre.
+
+SELECT DISTINCT e.nombre, e.apellido
+FROM Empleados e
+JOIN Asignaciones a ON e.id = a.idEmpleado
+JOIN Proyectos p ON a.idProyecto = p.id
+WHERE e.ciudad = p.ciudad
+ORDER BY e.apellido, e.nombre ASC;
+
+b) Mostrar el nombre y apellidos de los empleados que ganan más que algún supervisor suyo que viva en su ciudad.
+
+SELECT DISTINCT e.nombre, e.apellido
+FROM Empleados e
+JOIN Asignaciones a ON e.id = a.idEmpleado
+JOIN Empleados s ON a.idSupervisor = s.id
+WHERE e.salario > s.salario
+AND e.ciudad = s.ciudad;
+
+c) Listar el nombre y apellido de todos los empleados cuyo nombre empieza por ‘A’ con el número de proyectos asignados y suma total de horas asignadas a proyectos.
+
+SELECT e.nombre, e.apellido, 
+       COUNT(DISTINCT a.idProyecto) AS num_proyectos, 
+       SUM(a.horasDedicadas) AS total_horas
+FROM Empleados e
+JOIN Asignaciones a ON e.id = a.idEmpleado
+WHERE e.nombre LIKE 'A%'
+GROUP BY e.id;
+
+d) Mostrar las ciudades que sólo tienen un proyecto y ciudades de empleados con
+fecha de nacimiento desconocida
+
+SELECT DISTINCT p.ciudad
+FROM Proyectos p
+WHERE (p.ciudad IN (
+      SELECT ciudad 
+      FROM Proyectos 
+      GROUP BY ciudad 
+      HAVING COUNT(id) = 1
+) 
+OR p.ciudad IN (
+      SELECT ciudad 
+      FROM Empleados 
+      WHERE fechaNacimiento IS NULL
+));
